@@ -1,0 +1,68 @@
+import { useState } from "react";
+import axios from "axios";
+
+
+function App() {
+  const [form, setForm] = useState({ email: "", password: "", pin: ""});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  const handleFormChange = (event) => {
+    const { name, value } = event.target;
+
+    setForm((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await axios.post("http://localhost:3001/api/signup", form);
+      setSuccess("Form submitted successfully!");
+      console.log("API Response:", response.data);
+    } catch (error) {
+      setError(error.response?.data?.message || "Failed to submit form.");
+      console.error("API Error:", error.response || error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+        <label>Email</label>
+        <input
+          onChange={handleFormChange}
+          name="email"
+          type="email"
+          value={form.email}
+        />
+        <label>Password</label>
+        <input
+          onChange={handleFormChange}
+          name="password"
+          type="password"
+          value={form.password}
+        />
+        <label>PIN</label>
+        <input
+          onChange={handleFormChange}
+          name="pin"
+          type="password"
+          value={form.pin}
+        />
+        <button type="submit">Submit</button>
+      </form>
+    </>
+  );
+}
+
+export default App;
