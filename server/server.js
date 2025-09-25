@@ -6,9 +6,11 @@ import cookieParser from "cookie-parser";
 import testRoute from "./routes/testRoute.js";
 import signUpRoute from './routes/adminSignUpRoute.js'
 import loginRoute from './routes/adminLoginRoute.js'
+import logoutRoute from "./routes/adminLogoutRoute.js"
 import documentUploadRoute from "./routes/documentUploadRoute.js"
 import dashboardRoutes from "./routes/dashboardRoute.js"
 import getAllDocuments from "./routes/getAllDocuments.js"
+
 
 dotenv.config();
 
@@ -29,6 +31,7 @@ app.use("/api", loginRoute)
 app.use("/api", documentUploadRoute)
 app.use("/api", dashboardRoutes );
 app.use("/api", getAllDocuments );
+app.use("/api", logoutRoute );
 
 app.listen(PORT, () => {
   console.log(`Server is Live on ${PORT}`);

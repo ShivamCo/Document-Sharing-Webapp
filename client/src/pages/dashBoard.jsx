@@ -1,270 +1,35 @@
-import { useEffect, useState, useCallback } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import useAuth from "../hooks/useAuth";
+import useDocuments from "../hooks/useDocuments";
+import Header from "../components/dashboard/Header";
+import WelcomeSection from "../components/dashboard/WelcomeSection";
+import DocumentGrid from "../components/dashboard/DocumentGrid";
+import LoadingSpinner from "../components/dashboard/LoadingSpinner";
+import ErrorMessage from "../components/dashboard/ErrorMessage";
+import "react-toastify/dist/ReactToastify.css";
 
-// Constants
-const SUPPORTED_IMAGE_FORMATS = ["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp", "tiff"];
-const PDF_FORMAT = "pdf";
-const API_URL = import.meta.env.VITE_API_URL;
-
-// Custom hook for authentication
-const useAuth = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [authError, setAuthError] = useState(null);
-  const navigate = useNavigate();
-
-  const checkAuth = useCallback(async () => {
-    try {
-      setAuthError(null);
-      const response = await axios.get(`${API_URL}/auth/me`, {
-        withCredentials: true,
-      });
-      
-      if (response.data.user) {
-        setUser(response.data.user);
-        return response.data.user;
-      } else {
-        throw new Error("No user data received");
-      }
-    } catch (error) {
-      console.error("Authentication error:", error);
-      setAuthError("Session expired. Please log in again.");
-      navigate("/user");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [navigate]);
-
-  return { user, loading, authError, checkAuth };
-};
-
-// Custom hook for documents management
-const useDocuments = (adminId) => {
-  const [documents, setDocuments] = useState([]);
-  const [documentsLoading, setDocumentsLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const fetchDocuments = useCallback(async () => {
-    if (!adminId) {
-      setError("Admin ID not available");
-      return;
-    }
-
-    setDocumentsLoading(true);
-    setError(null);
-    
-    try {
-      const response = await axios.get(
-        `${API_URL}/get-all-documents/${adminId}`,
-        { 
-          withCredentials: true,
-          timeout: 10000
-        }
-      );
-      
-      const docs = Array.isArray(response.data) ? response.data : [];
-      setDocuments(docs);
-    } catch (err) {
-      const errorMessage = err.response?.data?.error || 
-                          err.response?.data?.message || 
-                          err.message || 
-                          "Failed to fetch documents";
-      setError(errorMessage);
-      console.error("Error fetching documents:", err);
-    } finally {
-      setDocumentsLoading(false);
-    }
-  }, [adminId]);
-
-  const refreshDocuments = useCallback(() => {
-    fetchDocuments();
-  }, [fetchDocuments]);
-
-  return { 
-    documents, 
-    documentsLoading, 
-    error, 
-    fetchDocuments: refreshDocuments 
-  };
-};
-
-// Loading component
-const LoadingSpinner = ({ size = "medium" }) => {
-  const sizes = {
-    small: "h-6 w-6",
-    medium: "h-12 w-12",
-    large: "h-16 w-16"
-  };
-
-  return (
-    <div 
-      className="flex justify-center items-center min-h-64"
-      role="status"
-      aria-label="Loading documents"
-    >
-      <div 
-        className={`animate-spin rounded-full border-b-2 border-blue-600 ${sizes[size]}`}
-      ></div>
-    </div>
-  );
-};
-
-// Error component
-const ErrorMessage = ({ message, onRetry, type = "error" }) => {
-  const styles = {
-    error: "bg-red-50 border-red-200 text-red-700",
-    warning: "bg-yellow-50 border-yellow-200 text-yellow-700",
-    info: "bg-blue-50 border-blue-200 text-blue-700"
-  };
-
-  return (
-    <div className={`border rounded-lg p-4 text-center ${styles[type]}`}>
-      <p className="mb-3 font-medium">{message}</p>
-      {onRetry && (
-        <button
-          onClick={onRetry}
-          className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors font-medium"
-        >
-          Retry
-        </button>
-      )}
-    </div>
-  );
-};
-
-// Document Card component
-const DocumentCard = ({ document }) => {
-  const { original_name, file_type, file_url, file_size, created_at, mime_type } = document;
-  
-  const getFileType = () => {
-    if (file_type) return file_type;
-    if (mime_type) {
-      if (mime_type.startsWith('image/')) return 'image';
-      if (mime_type === 'application/pdf') return 'pdf';
-    }
-    return 'unknown';
-  };
-
-  const fileType = getFileType();
-  const isImage = fileType === 'image';
-  const isPdf = fileType === 'pdf';
-
-  const formatFileSize = (bytes) => {
-    if (!bytes) return 'Unknown size';
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / 1048576).toFixed(1)} MB`;
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Unknown date';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const getFilePreview = () => {
-    if (isImage) {
-      return (
-        <img
-          src={file_url}
-          alt={original_name}
-          className="w-full h-48 object-cover rounded-md mb-2"
-          loading="lazy"
-          onError={(e) => {
-            e.target.style.display = 'none';
-            e.target.nextSibling.style.display = 'flex';
-          }}
-        />
-      );
-    }
-
-    if (isPdf) {
-      return (
-        <div className="w-full h-48 bg-gradient-to-br from-red-50 to-red-100 rounded-md mb-2 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-5xl text-red-500 mb-2">📄</div>
-            <span className="text-sm text-red-700 font-medium">PDF Document</span>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="w-full h-48 bg-gray-100 rounded-md mb-2 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-5xl text-gray-400 mb-2">📎</div>
-          <span className="text-sm text-gray-600 font-medium">Document</span>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 bg-white p-4 group">
-      <p 
-        className="font-medium text-gray-900 mb-2 truncate text-sm" 
-        title={original_name}
-      >
-        {original_name}
-      </p>
-      
-      <div className="relative">
-        {getFilePreview()}
-        {isImage && (
-          <div className="hidden w-full h-48 bg-gray-100 rounded-md mb-2 items-center justify-center absolute top-0 left-0">
-            <div className="text-center">
-              <div className="text-4xl text-gray-400 mb-2">🖼️</div>
-              <span className="text-sm text-gray-600">Image not available</span>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded capitalize">
-          {fileType}
-        </span>
-        <span className="text-xs text-gray-500">
-          {formatFileSize(file_size)}
-        </span>
-      </div>
-      
-      <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-        <span className="text-xs text-gray-400">
-          {formatDate(created_at)}
-        </span>
-        <a
-          href={file_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors flex items-center gap-1"
-        >
-          {isPdf ? "View" : "Open"}
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </a>
-      </div>
-    </div>
-  );
-};
-
-// Main Dashboard Component
 const Dashboard = () => {
-  const { user, loading, authError, checkAuth } = useAuth();
+  const { user, loading, authError, checkAuth, logout } = useAuth();
   const [adminId, setAdminId] = useState(null);
   const { documents, documentsLoading, error, fetchDocuments } = useDocuments(adminId);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const initializeAuth = async () => {
       const userData = await checkAuth();
       if (userData) {
         setAdminId(userData.id);
+        toast.success(`Welcome back, ${userData.name}! 🎉`, {
+          position: "bottom-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
       }
     };
 
@@ -277,86 +42,180 @@ const Dashboard = () => {
     }
   }, [adminId, fetchDocuments]);
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    const toastId = toast.loading("Refreshing documents... 🔄", {
+      position: "bottom-center",
+    });
+
+    try {
+      await fetchDocuments();
+      
+      toast.update(toastId, {
+        render: "Documents refreshed successfully! ✅",
+        type: "success",
+        isLoading: false,
+        autoClose: 2000,
+        hideProgressBar: false,
+      });
+    } catch (err) {
+      toast.update(toastId, {
+        render: "Failed to refresh documents ❌",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    const toastId = toast.loading("Signing out... 👋", {
+      position: "bottom-center",
+    });
+
+    try {
+      await logout();
+      toast.update(toastId, {
+        render: "Signed out successfully! ✅",
+        type: "success",
+        isLoading: false,
+        autoClose: 2000,
+      });
+    } catch (err) {
+      toast.update(toastId, {
+        render: "Error signing out ❌",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="large" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
+        <LoadingSpinner size="large" text="Loading your dashboard..." />
       </div>
     );
   }
 
   if (authError) {
+    toast.error(`Authentication Error: ${authError} 🔒`, {
+      position: "bottom-center",
+      autoClose: 5000,
+    });
+    
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
         <ErrorMessage message={authError} type="error" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Document Dashboard</h1>
-          {user && (
-            <p className="text-lg text-gray-600 mt-2">
-              Welcome back, <span className="font-semibold text-blue-600">{user.name}</span>
-            </p>
-          )}
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-100">
+      {/* Toast Container */}
+      <ToastContainer
+        position="bottom-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        style={{ marginTop: '80px' }}
+        toastStyle={{
+          background: 'white',
+          color: '#374151',
+          borderRadius: '12px',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #e5e7eb',
+        }}
+      />
 
+      <Header user={user} onLogout={handleLogout} />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <WelcomeSection user={user} documentCount={documents.length} />
+        
         {/* Documents Section */}
-        <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Your Documents</h2>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+        <section className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/50 p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Your Documents</h2>
+              <p className="text-gray-600 mt-1">Manage and access all your uploaded files</p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <span className="text-sm text-gray-600 bg-gray-100 px-3 py-2 rounded-full font-medium">
                 {documents.length} document{documents.length !== 1 ? 's' : ''}
               </span>
               <button
-                onClick={fetchDocuments}
-                disabled={documentsLoading}
-                className="text-gray-500 hover:text-gray-700 transition-colors"
+                onClick={handleRefresh}
+                disabled={documentsLoading || refreshing}
+                className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
                 title="Refresh documents"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+                {refreshing ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
+                <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
               </button>
             </div>
           </div>
 
-          {/* Error State */}
-          {error && (
-            <ErrorMessage 
-              message={error} 
-              onRetry={fetchDocuments}
-              type="error"
-            />
-          )}
-
-          {/* Loading State */}
-          {documentsLoading ? (
-            <LoadingSpinner />
-          ) : (
-            /* Documents Grid */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {documents.length === 0 ? (
-                <div className="col-span-full text-center py-12">
-                  <div className="text-6xl text-gray-300 mb-4">📁</div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No documents yet</h3>
-                  <p className="text-gray-500">Your uploaded documents will appear here</p>
-                </div>
-              ) : (
-                documents.map((document) => (
-                  <DocumentCard key={document.id} document={document} />
-                ))
-              )}
-            </div>
-          )}
+          <DocumentGrid 
+            documents={documents} 
+            loading={documentsLoading} 
+            error={error} 
+            onRetry={handleRefresh} 
+          />
         </section>
-      </div>
+
+        {/* Quick Stats */}
+        {documents.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-green-600">{documents.length}</div>
+              <div className="text-sm text-green-700">Total Documents</div>
+            </div>
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-blue-600">
+                {documents.filter(doc => doc.size < 1024 * 1024).length}
+              </div>
+              <div className="text-sm text-blue-700">Small Files (&lt;1MB)</div>
+            </div>
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {new Set(documents.map(doc => doc.type)).size}
+              </div>
+              <div className="text-sm text-purple-700">File Types</div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="mt-12 border-t border-gray-200/50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-gray-600">
+            © 2024 DocManager. All rights reserved.
+          </p>
+          <p className="text-gray-500 text-sm mt-2">
+            {documents.length > 0 
+              ? `You have ${documents.length} document${documents.length !== 1 ? 's' : ''} stored securely` 
+              : 'Start uploading documents to see them here!'}
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };

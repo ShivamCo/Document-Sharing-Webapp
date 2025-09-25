@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import AuthPage from "./pages/authPage";
 import Homepage from "./pages/homePage";
 import Dashboard from "./pages/dashBoard";
+import RequireAuth from "./middleware/RequireAuth";
 
 function App() {
   return (
@@ -9,7 +10,9 @@ function App() {
       <Routes>
         <Route path="/user" element={<AuthPage />} />
         <Route path="/" element={<Homepage />} />
+        
         <Route path="/dashboard" element={<Dashboard />} />
+       
       </Routes>
     </BrowserRouter>
   );
