@@ -1,7 +1,9 @@
+import { FaRegFile, FaRegFilePdf, FaRegFileImage, FaRegFileWord, FaRegFileExcel, FaRegFileArchive, FaDownload, FaEye } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
 import DeleteButton from "./DeleteButton";
 
 const DocumentCard = ({ document, adminId }) => {
-  const { original_name, file_type, file_url, file_size, created_at, mime_type } = document;
+  const { original_name, file_type, file_url, file_size, created_at, mime_type, email } = document;
   
   const getFileType = () => {
     if (file_type) return file_type;
@@ -19,6 +21,19 @@ const DocumentCard = ({ document, adminId }) => {
   const isImage = fileType === 'image';
   const isPdf = fileType === 'pdf';
 
+  const getFileIcon = () => {
+    const iconProps = { className: "text-4xl mb-3 transform group-hover:scale-110 transition-transform duration-300" };
+    
+    switch (fileType) {
+      case 'image': return <FaRegFileImage {...iconProps} />;
+      case 'pdf': return <FaRegFilePdf {...iconProps} />;
+      case 'word': return <FaRegFileWord {...iconProps} />;
+      case 'excel': return <FaRegFileExcel {...iconProps} />;
+      case 'archive': return <FaRegFileArchive {...iconProps} />;
+      default: return <FaRegFile {...iconProps} />;
+    }
+  };
+
   const formatFileSize = (bytes) => {
     if (!bytes) return 'Unknown size';
     if (bytes < 1024) return `${bytes} B`;
@@ -31,20 +46,10 @@ const DocumentCard = ({ document, adminId }) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
-  };
-
-  const getFileIcon = () => {
-    const icons = {
-      image: '🖼️',
-      pdf: '📄',
-      word: '📝',
-      excel: '📊',
-      archive: '📦',
-      file: '📎'
-    };
-    return icons[fileType] || icons.file;
   };
 
   const getFilePreview = () => {
@@ -63,7 +68,7 @@ const DocumentCard = ({ document, adminId }) => {
           />
           <div className="hidden absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 items-center justify-center">
             <div className="text-center">
-              <div className="text-4xl text-blue-500 mb-2">{getFileIcon()}</div>
+              {getFileIcon()}
               <span className="text-sm text-blue-700 font-medium">Image</span>
             </div>
           </div>
@@ -74,9 +79,7 @@ const DocumentCard = ({ document, adminId }) => {
     return (
       <div className="w-full h-48 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl mb-3 flex items-center justify-center group-hover:from-blue-50 group-hover:to-blue-100 transition-all duration-300">
         <div className="text-center">
-          <div className="text-6xl mb-3 transform group-hover:scale-110 transition-transform duration-300">
-            {getFileIcon()}
-          </div>
+          {getFileIcon()}
           <span className="text-sm font-medium capitalize">{fileType}</span>
         </div>
       </div>
@@ -89,12 +92,20 @@ const DocumentCard = ({ document, adminId }) => {
       <div className="relative bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 p-4 border border-gray-100 group-hover:border-blue-200">
         {getFilePreview()}
         
+        {/* File Name */}
         <p 
-          className="font-semibold text-gray-900 mb-3 truncate text-base leading-tight" 
+          className="font-semibold text-gray-900 mb-2 truncate text-base leading-tight" 
           title={original_name}
         >
           {original_name}
         </p>
+        
+        {/* Uploader Email */}
+        {email && (
+          <p className="text-xs text-gray-500 mb-3 truncate" title={`Uploaded by: ${email}`}>
+            <span className="font-medium">Uploader:</span> {email}
+          </p>
+        )}
         
         <div className="flex justify-between items-center mb-3">
           <span className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full capitalize">
@@ -105,23 +116,29 @@ const DocumentCard = ({ document, adminId }) => {
           </span>
         </div>
         
-        <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+        {/* Upload Time */}
+        <div className="mb-3">
           <span className="text-xs text-gray-400 font-medium">
-            {formatDate(created_at)}
+            Uploaded: {formatDate(created_at)}
           </span>
+        </div>
+        
+        <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+          <DeleteButton 
+            adminId={adminId} 
+            fileId={document.file_id}
+            icon={<MdDelete className="w-4 h-4" />}
+          />
           <a
             href={file_url}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium text-sm shadow-md hover:shadow-lg"
           >
-            {isPdf ? "View" : "Open"}
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
+            {isPdf ? "View" : "Download"}
+            {isPdf ? <FaEye className="w-4 h-4" /> : <FaDownload className="w-4 h-4" />}
           </a>
         </div>
-        <DeleteButton adminId={adminId} fileId={document.file_id}  />
       </div>
     </div>
   );

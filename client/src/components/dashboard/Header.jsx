@@ -13,7 +13,7 @@ const Header = ({ user, onLogout }) => {
               <span className="text-white font-bold text-lg">D</span>
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              DocManager
+              PrintDoc Manager
             </h1>
           </div>
 
