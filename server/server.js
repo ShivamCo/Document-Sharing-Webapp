@@ -10,6 +10,7 @@ import logoutRoute from "./routes/adminLogoutRoute.js"
 import documentUploadRoute from "./routes/documentUploadRoute.js"
 import dashboardRoutes from "./routes/dashboardRoute.js"
 import getAllDocuments from "./routes/getAllDocuments.js"
+import deleteDocumentsRoute from "./routes/deleteDocumentRoute.js"
 
 
 dotenv.config();
@@ -32,6 +33,7 @@ app.use("/api", documentUploadRoute)
 app.use("/api", dashboardRoutes );
 app.use("/api", getAllDocuments );
 app.use("/api", logoutRoute );
+app.use("/api", deleteDocumentsRoute );
 
 app.listen(PORT, () => {
   console.log(`Server is Live on ${PORT}`);

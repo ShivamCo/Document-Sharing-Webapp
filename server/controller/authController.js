@@ -132,3 +132,48 @@ export const logout = (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+
+// CHANGE PIN
+export const changePin = async (req, res) => {
+  const { email, oldPin, newPin } = req.body;
+
+  try {
+    if (!email || !oldPin || !newPin) {
+      return res
+        .status(400)
+        .json({ message: "Email, old PIN, and new PIN are required" });
+    }
+
+    
+    const result = await pool.query(
+      "SELECT * FROM admins WHERE email = $1",
+      [email]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const admin = result.rows[0];
+
+    
+    const isOldPinValid = await bcrypt.compare(oldPin, admin.upload_pin);
+    if (!isOldPinValid) {
+      return res.status(401).json({ message: "Old PIN is incorrect" });
+    }
+
+    
+    const hashedNewPin = await bcrypt.hash(newPin, 10);
+
+    
+    await pool.query(
+      "UPDATE admins SET upload_pin = $1 WHERE email = $2",
+      [hashedNewPin, email]
+    );
+
+    return res.status(200).json({ message: "PIN changed successfully." });
+  } catch (error) {
+    console.error("Change PIN error:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};

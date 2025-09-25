@@ -2,7 +2,7 @@ import DocumentCard from "./DocumentCard";
 import LoadingSpinner from "./LoadingSpinner";
 import ErrorMessage from "./ErrorMessage";
 
-const DocumentGrid = ({ documents, loading, error, onRetry }) => {
+const DocumentGrid = ({ documents, loading, error, onRetry, adminId }) => {
   if (loading) {
     return <LoadingSpinner text="Loading documents..." />;
   }
@@ -32,7 +32,7 @@ const DocumentGrid = ({ documents, loading, error, onRetry }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {documents.map((document) => (
-        <DocumentCard key={document.id} document={document} />
+        <DocumentCard key={document.id} adminId={adminId} document={document} />
       ))}
     </div>
   );

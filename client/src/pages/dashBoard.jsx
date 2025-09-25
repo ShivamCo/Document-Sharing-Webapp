@@ -8,6 +8,7 @@ import DocumentGrid from "../components/dashboard/DocumentGrid";
 import LoadingSpinner from "../components/dashboard/LoadingSpinner";
 import ErrorMessage from "../components/dashboard/ErrorMessage";
 import "react-toastify/dist/ReactToastify.css";
+import QrCodeGenrator from "../components/dashboard/QrCodeGenrator";
 
 const Dashboard = () => {
   const { user, loading, authError, checkAuth, logout } = useAuth();
@@ -116,6 +117,8 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-100">
+
+      
       {/* Toast Container */}
       <ToastContainer
         position="bottom-center"
@@ -141,7 +144,7 @@ const Dashboard = () => {
       <Header user={user} onLogout={handleLogout} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <WelcomeSection user={user} documentCount={documents.length} />
+        <WelcomeSection user={user} adminId={ adminId}  documentCount={documents.length} />
         
         {/* Documents Section */}
         <section className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/50 p-6">
@@ -173,6 +176,7 @@ const Dashboard = () => {
           </div>
 
           <DocumentGrid 
+          adminId={adminId}
             documents={documents} 
             loading={documentsLoading} 
             error={error} 

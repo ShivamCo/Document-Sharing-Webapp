@@ -206,7 +206,7 @@ const AuthPage = () => {
             {!isLogin && (
               <div className="space-y-2">
                 <label htmlFor="pin" className="block text-sm font-medium text-white">
-                  Security PIN
+                  Generate a PIN and share it with the user to allow document upload.
                 </label>
                 <div className="relative">
                   <input

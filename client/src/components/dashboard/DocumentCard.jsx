@@ -1,4 +1,6 @@
-const DocumentCard = ({ document }) => {
+import DeleteButton from "./DeleteButton";
+
+const DocumentCard = ({ document, adminId }) => {
   const { original_name, file_type, file_url, file_size, created_at, mime_type } = document;
   
   const getFileType = () => {
@@ -119,6 +121,7 @@ const DocumentCard = ({ document }) => {
             </svg>
           </a>
         </div>
+        <DeleteButton adminId={adminId} fileId={document.file_id}  />
       </div>
     </div>
   );
