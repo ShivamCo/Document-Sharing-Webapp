@@ -156,7 +156,7 @@ const DocumentCard = ({ document, adminId }) => {
           </span>
         </div>
 
-        {/* Upload Time */}
+        
         <div className="mb-3">
           <span className="text-xs text-gray-400 font-medium">
             Uploaded: {formatDate(created_at)}
