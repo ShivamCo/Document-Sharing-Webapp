@@ -16,6 +16,8 @@ const Dashboard = () => {
   const { documents, documentsLoading, error, fetchDocuments } = useDocuments(adminId);
   const [refreshing, setRefreshing] = useState(false);
 
+  console.log(documents)
+
   useEffect(() => {
     const initializeAuth = async () => {
       const userData = await checkAuth();
