@@ -44,6 +44,7 @@ export const signUp = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: 'None',
+      domain: 'print-doc-manager.netlify.app',
       maxAge: 60 * 60 * 1000,
     });
 
@@ -92,6 +93,7 @@ export const login = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: 'None',
+      domain: 'print-doc-manager.netlify.app',
       maxAge: 60 * 60 * 1000,
     });
 
@@ -116,6 +118,7 @@ export const logout = (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: 'None',
+      domain: 'print-doc-manager.netlify.app',
       expires: new Date(0),
     });
 
