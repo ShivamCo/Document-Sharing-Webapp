@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import pool from "../config/pgConfig.js";
 
-
 const generateToken = (admin) =>
   jwt.sign(
     { id: admin.id, email: admin.email, name: admin.name },
@@ -33,7 +32,6 @@ export const signUp = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const hashedPin = await bcrypt.hash(pin, 10);
 
-    
     const result = await pool.query(
       "INSERT INTO admins (email, password_hash, upload_pin, name) VALUES ($1, $2, $3, $4) RETURNING id, email, name",
       [email, hashedPassword, hashedPin, name]
@@ -42,13 +40,12 @@ export const signUp = async (req, res) => {
     const admin = result.rows[0];
     const token = generateToken(admin);
 
-  
     res.cookie("token", token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-  maxAge: 60 * 60 * 1000, 
-});
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 60 * 60 * 1000,
+    });
 
     return res.status(201).json({
       message: "User created successfully.",
@@ -64,7 +61,7 @@ export const signUp = async (req, res) => {
   }
 };
 
-// LOGIN 
+// LOGIN
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -75,10 +72,9 @@ export const login = async (req, res) => {
         .json({ message: "Email and Password are required" });
     }
 
-    const result = await pool.query(
-      "SELECT * FROM admins WHERE email = $1",
-      [email]
-    );
+    const result = await pool.query("SELECT * FROM admins WHERE email = $1", [
+      email,
+    ]);
 
     if (result.rows.length === 0) {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -92,12 +88,11 @@ export const login = async (req, res) => {
 
     const token = generateToken(admin);
 
-    
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-      maxAge: 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production", 
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 60 * 60 * 1000, 
     });
 
     return res.status(200).json({
@@ -114,16 +109,14 @@ export const login = async (req, res) => {
   }
 };
 
-
 // LOGOUT
 export const logout = (req, res) => {
   try {
-    
     res.cookie("token", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      expires: new Date(0), 
+      expires: new Date(0),
     });
 
     return res.status(200).json({ message: "Logout successful." });
@@ -144,11 +137,9 @@ export const changePin = async (req, res) => {
         .json({ message: "Email, old PIN, and new PIN are required" });
     }
 
-    
-    const result = await pool.query(
-      "SELECT * FROM admins WHERE email = $1",
-      [email]
-    );
+    const result = await pool.query("SELECT * FROM admins WHERE email = $1", [
+      email,
+    ]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "User not found" });
@@ -156,20 +147,17 @@ export const changePin = async (req, res) => {
 
     const admin = result.rows[0];
 
-    
     const isOldPinValid = await bcrypt.compare(oldPin, admin.upload_pin);
     if (!isOldPinValid) {
       return res.status(401).json({ message: "Old PIN is incorrect" });
     }
 
-    
     const hashedNewPin = await bcrypt.hash(newPin, 10);
 
-    
-    await pool.query(
-      "UPDATE admins SET upload_pin = $1 WHERE email = $2",
-      [hashedNewPin, email]
-    );
+    await pool.query("UPDATE admins SET upload_pin = $1 WHERE email = $2", [
+      hashedNewPin,
+      email,
+    ]);
 
     return res.status(200).json({ message: "PIN changed successfully." });
   } catch (error) {
