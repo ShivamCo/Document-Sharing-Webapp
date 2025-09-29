@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth.js"; 
+import useAuth from "../hooks/useAuth.js";
 import "react-toastify/dist/ReactToastify.css";
 
 const AuthPage = () => {
@@ -22,15 +22,14 @@ const AuthPage = () => {
   const [showPin, setShowPin] = useState(false);
 
   useEffect(() => {
-    
     const verifyUser = async () => {
       const loggedInUser = await checkAuth();
       if (loggedInUser) {
         navigate("/dashboard");
       }
     };
-    
-     verifyUser();
+
+    verifyUser();
   }, [checkAuth, navigate]);
 
   const handleInputChange = (e) => {
@@ -46,11 +45,13 @@ const AuthPage = () => {
 
     try {
       if (isLogin) {
-        await axios.post(
+        const res = await axios.post(
           `${API_URL}/login`,
           { email: formData.email, password: formData.password },
           { withCredentials: true }
         );
+
+        console.log(res);
 
         toast.update(toastId, {
           render: "Login successful 🎉",
@@ -136,7 +137,10 @@ const AuthPage = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
               <div className="space-y-2">
-                <label htmlFor="name" className="block text-sm font-medium text-white">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-white"
+                >
                   Full Name
                 </label>
                 <div className="relative">
@@ -150,15 +154,16 @@ const AuthPage = () => {
                     placeholder="John Doe"
                     required={!isLogin}
                   />
-                  <div className="absolute right-3 top-3 text-gray-400">
-                    👤
-                  </div>
+                  <div className="absolute right-3 top-3 text-gray-400">👤</div>
                 </div>
               </div>
             )}
 
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-white">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-white"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -172,14 +177,15 @@ const AuthPage = () => {
                   placeholder="hello@example.com"
                   required
                 />
-                <div className="absolute right-3 top-3 text-gray-400">
-                  ✉️
-                </div>
+                <div className="absolute right-3 top-3 text-gray-400">✉️</div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-white">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-white"
+              >
                 Password
               </label>
               <div className="relative">
@@ -205,8 +211,12 @@ const AuthPage = () => {
 
             {!isLogin && (
               <div className="space-y-2">
-                <label htmlFor="pin" className="block text-sm font-medium text-white">
-                  Generate a PIN and share it with the user to allow document upload.
+                <label
+                  htmlFor="pin"
+                  className="block text-sm font-medium text-white"
+                >
+                  Generate a PIN and share it with the user to allow document
+                  upload.
                 </label>
                 <div className="relative">
                   <input
@@ -266,12 +276,16 @@ const AuthPage = () => {
               {isLogin ? (
                 <>
                   Don't have an account?{" "}
-                  <span className="text-blue-400 group-hover:underline">Sign up</span>
+                  <span className="text-blue-400 group-hover:underline">
+                    Sign up
+                  </span>
                 </>
               ) : (
                 <>
                   Already have an account?{" "}
-                  <span className="text-blue-400 group-hover:underline">Sign in</span>
+                  <span className="text-blue-400 group-hover:underline">
+                    Sign in
+                  </span>
                 </>
               )}
             </button>
@@ -281,7 +295,9 @@ const AuthPage = () => {
         {/* Footer */}
         <div className="border-t border-white/10 p-4 text-center">
           <p className="text-gray-400 text-sm">
-            {isLogin ? "Secure access to your dashboard" : "Your data is safe with us"}
+            {isLogin
+              ? "Secure access to your dashboard"
+              : "Your data is safe with us"}
           </p>
         </div>
       </div>

@@ -41,13 +41,13 @@ export const signUp = async (req, res) => {
     const token = generateToken(admin);
 
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      domain: "print-doc-manager.netlify.app",
-      expires: new Date(0),
-      path: "/",
-    });
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production", // true in production
+  sameSite: "None", // required for cross-site
+  maxAge: 1000 * 60 * 60, // 1 hour
+  path: "/",
+});
+
 
     return res.status(201).json({
       message: "User created successfully.",
@@ -91,13 +91,12 @@ export const login = async (req, res) => {
     const token = generateToken(admin);
 
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      domain: "print-doc-manager.netlify.app",
-      expires: new Date(0),
-      path: "/",
-    });
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production", // true in production
+  sameSite: "None", // required for cross-site
+  maxAge: 1000 * 60 * 60, // 1 hour
+  path: "/",
+});
 
     return res.status(200).json({
       message: "Login successful.",
