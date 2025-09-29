@@ -12,10 +12,10 @@ import getAllDocuments from "./routes/getAllDocuments.js";
 import deleteDocumentsRoute from "./routes/deleteDocumentRoute.js";
 import dotenv from "dotenv";
 
-dotenv.config({ path: "/print-doc-secrets/.env" });
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 const ORIGIN = process.env.ORIGIN;
 app.use(express.json());
 app.use(cookieParser());
@@ -32,7 +32,7 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+    if (allowedOrigins.includes(origin) || !origin) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
@@ -41,7 +41,6 @@ const corsOptions = {
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
 };
-
 app.use(cors(corsOptions));
 
 app.use("/api", testRoute);
@@ -53,6 +52,6 @@ app.use("/api", getAllDocuments);
 app.use("/api", logoutRoute);
 app.use("/api", deleteDocumentsRoute);
 
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT,() => {
   console.log(`Server is Live on ${PORT}`);
 });
