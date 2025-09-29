@@ -4,8 +4,24 @@ import Homepage from "./pages/homePage";
 import Dashboard from "./pages/dashBoard";
 import RequireAuth from "./middleware/RequireAuth";
 import UploadPage from "./pages/uploadPage";
+import axios from "axios";
+
+
 
 function App() {
+const API_URL = import.meta.env.VITE_API_URL;
+  const wakeServer = () =>{
+
+    try {
+
+      const res = axios.get(API_URL, )
+
+    } catch (error){
+
+    }
+
+
+  }
   
   return (
     <BrowserRouter>

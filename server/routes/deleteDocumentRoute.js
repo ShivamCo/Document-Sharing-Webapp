@@ -5,6 +5,6 @@ import { authenticate } from "../middleware/authenticate.js";
 const router = express.Router();
 
 
-router.delete("/delete/:adminId/:fileId", deleteFileController );
+router.delete("/delete/:adminId/:fileId", authenticate, deleteFileController );
 
 export default router;
