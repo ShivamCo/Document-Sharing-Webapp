@@ -26,8 +26,8 @@ app.use(cookieParser());
 // }));
 
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://print-doc-manager.netlify.app",
+  "localhost:5173",
+  "print-doc-manager.netlify.app",
 ];
 
 const corsOptions = {
@@ -41,6 +41,8 @@ const corsOptions = {
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
 };
+
+
 app.use(cors(corsOptions));
 
 app.use("/api", testRoute);
