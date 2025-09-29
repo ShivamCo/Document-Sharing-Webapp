@@ -42,10 +42,11 @@ export const signUp = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: 'None',
-      domain: 'print-doc-manager.netlify.app',
-      maxAge: 60 * 60 * 1000,
+      secure: true,
+      sameSite: "None",
+      domain: "print-doc-manager.netlify.app",
+      expires: new Date(0),
+      path: "/",
     });
 
     return res.status(201).json({
@@ -91,10 +92,11 @@ export const login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: 'None',
-      domain: 'print-doc-manager.netlify.app',
-      maxAge: 60 * 60 * 1000,
+      secure: true,
+      sameSite: "None",
+      domain: "print-doc-manager.netlify.app",
+      expires: new Date(0),
+      path: "/",
     });
 
     return res.status(200).json({
@@ -116,10 +118,11 @@ export const logout = (req, res) => {
   try {
     res.cookie("token", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: 'None',
-      domain: 'print-doc-manager.netlify.app',
+      secure: true,
+      sameSite: "None",
+      domain: "print-doc-manager.netlify.app",
       expires: new Date(0),
+      path: "/",
     });
 
     return res.status(200).json({ message: "Logout successful." });
