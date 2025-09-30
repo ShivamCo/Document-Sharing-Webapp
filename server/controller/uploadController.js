@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import pool from "../config/pgConfig.js";
 import imagekit from "../config/imagekit.js";
-import { decryptPin } from "../utils/pinUtils.js"; 
+import { decryptPin } from "../middleware/pinEncryption.js";
 
 const uploadFileController = async (req, res) => {
   const { adminId } = req.params;
