@@ -118,7 +118,7 @@ const Dashboard = () => {checkAuth
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-100">
+    <div className="min-h-screen z-10 bg-gradient-to-br from-blue-50 via-white to-gray-100">
 
       
       {/* Toast Container */}
