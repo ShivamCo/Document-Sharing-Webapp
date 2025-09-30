@@ -58,6 +58,7 @@ const WelcomeSection = ({ user, documentCount, adminId }) => {
               <div className="text-center mb-3">
                 <h3 className="font-semibold text-white mb-1">Share QR Code</h3>
                 <p className="text-blue-100 text-xs md:text-sm">Scan to Upload Documents</p>
+                <p className="text-yellow-400 bg-black  border-2 rounded-2xl  text-2xl md:text-lg">Share Pin : {user?.pin}</p>
               </div>
               
               <div className="flex flex-col items-center space-y-3">
