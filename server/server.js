@@ -20,30 +20,30 @@ const ORIGIN = process.env.ORIGIN;
 app.use(express.json());
 app.use(cookieParser());
 
-// app.use(cors({
-//   origin: 'https://print-doc-manager.netlify.app', ,
-//   credentials: true
-// }));
+app.use(cors({
+  origin: 'https://print-doc-manager.netlify.app', 
+  credentials: true
+}));
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://print-doc-manager.netlify.app",
-];
+// const allowedOrigins = [
+//   "http://localhost:5173",
+//   "https://print-doc-manager.netlify.app",
+// ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true,
-};
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (allowedOrigins.includes(origin) || !origin) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+//   credentials: true,
+// };
 
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 app.use("/api", testRoute);
 app.use("/api", signUpRoute);

@@ -10,7 +10,7 @@ import ErrorMessage from "../components/dashboard/ErrorMessage";
 import "react-toastify/dist/ReactToastify.css";
 import QrCodeGenrator from "../components/dashboard/QrCodeGenrator";
 
-const Dashboard = () => {
+const Dashboard = () => {checkAuth
   const { user, loading, authError, checkAuth, logout } = useAuth();
   const [adminId, setAdminId] = useState(null);
   const { documents, documentsLoading, error, fetchDocuments } = useDocuments(adminId);
