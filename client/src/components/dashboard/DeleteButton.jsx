@@ -1,7 +1,7 @@
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -15,7 +15,18 @@ const DeleteButton = ({ adminId, fileId, onDeleteSuccess, onDeleteError }) => {
       return;
     }
 
-    if (!window.confirm("Are you sure you want to delete this file? This action cannot be undone.")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this file? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    // 👇 Get token from localStorage
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You are not authorized. Please log in again.");
       return;
     }
 
@@ -23,8 +34,15 @@ const DeleteButton = ({ adminId, fileId, onDeleteSuccess, onDeleteError }) => {
     const toastId = toast.loading("Deleting file...");
 
     try {
-      const response = await axios.delete(`${API_URL}/delete/${adminId}/${fileId}`);
-      
+      const response = await axios.delete(
+        `${API_URL}/delete/${adminId}/${fileId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // 👈 Send JWT here
+          },
+        }
+      );
+
       if (response.status === 200) {
         toast.update(toastId, {
           render: "File deleted successfully!",
@@ -33,39 +51,34 @@ const DeleteButton = ({ adminId, fileId, onDeleteSuccess, onDeleteError }) => {
           autoClose: 2000,
           closeOnClick: true,
         });
-        
-        console.log("File deleted successfully");
-        
-        if (onDeleteSuccess) {
-          onDeleteSuccess(response.data);
-        }
-        
-      
+
+        if (onDeleteSuccess) onDeleteSuccess(response.data);
+
         setTimeout(() => {
           window.location.reload();
         }, 1500);
       }
     } catch (error) {
       console.error("Error deleting file:", error);
-      
+
       toast.update(toastId, {
-        render: error.response?.data?.message || "Failed to delete file. Please try again.",
+        render:
+          error.response?.data?.message ||
+          "Failed to delete file. Please try again.",
         type: "error",
         isLoading: false,
         autoClose: 5000,
         closeOnClick: true,
       });
 
-      if (onDeleteError) {
-        onDeleteError(error);
-      }
+      if (onDeleteError) onDeleteError(error);
     } finally {
       setIsDeleting(false);
     }
   };
 
   return (
-    <button 
+    <button
       onClick={handleDelete}
       disabled={isDeleting}
       className="delete-button"

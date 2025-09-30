@@ -43,7 +43,7 @@ export const signUp = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: "None",
       maxAge: 1000 * 60 * 60,
       path: "/",
     });
@@ -114,12 +114,10 @@ export const login = async (req, res) => {
 // LOGOUT
 export const logout = (req, res) => {
   try {
-    res.cookie("token", "", {
+    res.clearCookie("token", {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      domain: "print-doc-manager.netlify.app",
-      expires: new Date(0),
+      secure: true,        
+      sameSite: "None",    
       path: "/",
     });
 
